@@ -12,11 +12,9 @@ async fn main() -> error::FakeRestResult {
     
     loop {
         let (mut socket, _) = listener.accept().await?;
-        let mut buf = String::new();
-        
-        tokio::spawn(async move {
-            let request = request::parse_request(&socket)?;
-        });
+        let request = request::parse_request(&mut socket).await?;
+        println!("request: {:?}", request);
     }
 
+    
 }
