@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use tokio::net::{TcpListener, TcpStream};
+use std::path::PathBuf;
+use clap::Parser;
 
 mod error;
 mod server_config;
@@ -20,6 +22,16 @@ const FAKE_REST: &str = r"
 |__/   \_______/|__/  \__/ \_______/      |__/  |__/ \_______/|_______/    \___/  
                                                                                                                                                                                                                                                
 ";
+
+
+#[derive(Parser)]
+#[command(author, version, about, long_about = Some(
+    "Fake Rest make development easier by serving a fake restApi server with given config file."
+))]
+pub struct FakeRestArgs {
+    #[arg(short, long)]
+    pub config: PathBuf
+}
 
 
 async fn handle(socket: TcpStream) -> FakeRestResult {
@@ -48,8 +60,11 @@ async fn handle(socket: TcpStream) -> FakeRestResult {
 #[tokio::main]
 async fn main() -> FakeRestResult {
     println!("{}", FAKE_REST);
-    let port = 7000;
-    let host_and_port = format!("127.0.0.1:{}", port);
+
+    let args = FakeRestArgs::parse();
+    let server_config = server_config::parse_config_file(args.config).await?;
+
+    let host_and_port = format!("127.0.0.1:{}", server_config.config.port);
     let listener = TcpListener::bind(&host_and_port).await?;
     println!("Start the server at <http://{}>...", host_and_port);
     loop {
