@@ -24,6 +24,7 @@ impl Connection {
         for (k, v) in response.headers.iter() {
             self.socket.write_all(format!("{} : {}\r\n", k, v).as_bytes()).await?;
         }
+        self.socket.write_all(b"\r\n").await?;
         if response.body.len() != 0 {
             self.socket.write_all(format!("{}\r\n", response.body).as_bytes()).await?;
         }
