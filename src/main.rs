@@ -1,14 +1,13 @@
 use std::collections::HashMap;
-
-use error::FakeRestResult;
-use server::request::Request;
 use tokio::net::{TcpListener, TcpStream};
-
-use crate::server::{response::{Status, Response}, connection::Connection};
 
 mod error;
 mod server_config;
 mod server;
+
+use error::FakeRestResult;
+use crate::server::{response::{Status, Response}, connection::Connection};
+use server::request::Request;
 
 const FAKE_REST: &str = r"
 /$$$$$$$$       /$$                       /$$$$$$$                        /$$    
@@ -41,7 +40,7 @@ async fn handle(socket: TcpStream) -> FakeRestResult {
         body
     };
     connection.respond(response).await?;
-
+    
     Ok(())
 }
 
