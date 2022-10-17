@@ -1,0 +1,28 @@
+[config]
+port = 7000
+
+[[server]]
+method = "GET"
+path = "/"
+result_type = "direct"
+result = "Hello, World!"
+status_code = 200
+headers = [#optional
+    "Content-Length : 1024", 
+    "Accept : application/plain"
+]
+queries = [#optional
+    "hello = how are you",
+    "fine = thank you",
+]
+
+[[server]]
+method = "GET"
+path = "/hello"
+result_type = "direct"
+result = "\"meg\" : \"hello!\""
+status_code = 200
+headers = [
+    "Content-Length : 1024", 
+    "Accept : application/json"
+]
