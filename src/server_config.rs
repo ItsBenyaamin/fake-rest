@@ -1,13 +1,19 @@
 use std::path::PathBuf;
 
-use serde::{Serialize, Deserialize};
+use serde::Deserialize;
 
-#[derive(Deserialize)]
-pub struct ServerSchema {
-    pub endpoints: Vec<ServerDataSchema>
+#[derive(Debug, Deserialize)]
+pub struct Server {
+    pub config: Config,
+    pub server: Vec<ServerDataSchema>
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
+pub struct Config {
+    pub port: usize
+}
+
+#[derive(Debug, Deserialize)]
 pub struct ServerDataSchema {
     pub method: String,
     pub path: String,
@@ -19,10 +25,8 @@ pub struct ServerDataSchema {
 }
 
 
-pub async fn parse_config_file(path: PathBuf) -> tokio::io::Result<ServerSchema> {
+pub async fn parse_config_file(path: PathBuf) -> tokio::io::Result<Server> {
     let content = tokio::fs::read_to_string(path).await?;
-    let parsed_to_serde: Vec<ServerDataSchema> = toml::from_str(&content).unwrap();
-    Ok(
-        ServerSchema { endpoints: parsed_to_serde }
-    )
+    let parsed_server: Server = toml::from_str(&content).unwrap();
+    Ok(parsed_server)
 }
