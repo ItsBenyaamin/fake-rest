@@ -1,20 +1,74 @@
+use std::collections::HashMap;
+
+use server::request::Request;
 use tokio::net::TcpListener;
+
+use crate::server::{response::{Status, Response}, connection::Connection};
 
 mod error;
 mod server_config;
-mod request;
-mod response;
+mod server;
 
+const FAKE_REST: &str = r"
+/$$$$$$$$       /$$                       /$$$$$$$                        /$$    
+| $$_____/      | $$                      | $$__  $$                      | $$    
+| $$    /$$$$$$ | $$   /$$  /$$$$$$       | $$  \ $$  /$$$$$$   /$$$$$$$ /$$$$$$  
+| $$$$$|____  $$| $$  /$$/ /$$__  $$      | $$$$$$$/ /$$__  $$ /$$_____/|_  $$_/  
+| $$__/ /$$$$$$$| $$$$$$/ | $$$$$$$$      | $$__  $$| $$$$$$$$|  $$$$$$   | $$    
+| $$   /$$__  $$| $$_  $$ | $$_____/      | $$  \ $$| $$_____/ \____  $$  | $$ /$$
+| $$  |  $$$$$$$| $$ \  $$|  $$$$$$$      | $$  | $$|  $$$$$$$ /$$$$$$$/  |  $$$$/
+|__/   \_______/|__/  \__/ \_______/      |__/  |__/ \_______/|_______/    \___/  
+                                                                                  
+                                                                                                                                                              
+";
 
 #[tokio::main]
 async fn main() -> error::FakeRestResult {
-    let listener = TcpListener::bind("127.0.0.1:7000").await?;
-    
+    println!("{}", FAKE_REST);
+    let port = 7000;
+    let host_and_port = format!("127.0.0.1:{}", port);
+    let listener = TcpListener::bind(&host_and_port).await?;
+    println!("Start the server at <http://{}>...", host_and_port);
     loop {
-        let (mut socket, _) = listener.accept().await?;
-        let request = request::parse_request(&mut socket).await?;
-        println!("request: {:?}", request);
-    }
+        let (socket, _) = listener.accept().await?;
+        let mut connection = Connection::new(socket).await?;
 
+        let body = String::from("Hello, World.");
+
+        let mut headers = HashMap::new();
+        headers.insert("Content-Type".to_string(), "application/json".to_string());
+        headers.insert("Content-Length".to_string(), body.len().to_string());
+
+        let response = Response {
+            status: Status::OK(),
+            headers,
+            body
+        };
+        connection.respond(response).await?;
+
+        format_for_print(&connection.request);
+    }
+}
+
+fn format_for_print(request: &Request) {
+    let mut query_strings = String::new();
+    if request.query_strings.len() == 0 {
+        query_strings.push_str("\n-      -- Empty --");
+    }else {
+        for query in request.query_strings.iter() {
+            let query_style = format!("\n-       -{} = {}", query.0, query.1);
+            query_strings.push_str(&query_style);
+        }
+    }
     
+    let mut headers = String::new();
+    for header in request.headers.iter(){
+        let header_style = format!("\n-      -{} : {}", header.0, header.1);
+        headers.push_str(&header_style);
+    }
+    println!("");
+    println!("------------------------ Start Request-------------------------");
+    let printable = format!("-- Version: {}\n-- Type: {}\n-- Path: {}\n-- Query Strings:{}\n-- Headers:{}", request.version, request.method, request.uri, query_strings, headers);
+    println!("{}", printable);
+    println!("------------------------ End  Request-------------------------");
 }
