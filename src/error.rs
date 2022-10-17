@@ -1,5 +1,5 @@
 pub type FakeRestResult = Result<(), Error>;
-pub type RequestParseResult = Result<crate::request::Request, Error>;
+pub type RequestParseResult = Result<crate::server::request::Request, Error>;
 
 #[derive(Debug, Clone)]
 pub enum Error {
