@@ -6,7 +6,7 @@ pub struct Status {
 }
 
 impl Status {
-    pub fn OK() -> Self {
+    pub fn ok() -> Self {
         Status { code: 200, message: String::from("OK") }
     }
 }

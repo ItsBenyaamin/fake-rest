@@ -46,11 +46,7 @@ async fn handle(socket: TcpStream) -> FakeRestResult {
         headers.insert("Host".to_string(), host.to_string());
     }
 
-    let response = Response {
-        status: Status::OK(),
-        headers,
-        body
-    };
+    let response = Response::new(Status::ok(), headers, body);
     connection.respond(response).await?;
     
     Ok(())
@@ -75,7 +71,7 @@ async fn main() -> FakeRestResult {
 
 fn format_for_print(request: &Request) {
     let mut query_strings = String::new();
-    if request.query_strings.len() == 0 {
+    if request.query_strings.is_empty() {
         query_strings.push_str("\n-      -- Empty --");
     }else {
         for query in request.query_strings.iter() {
@@ -89,7 +85,7 @@ fn format_for_print(request: &Request) {
         let header_style = format!("\n-      -{} : {}", header.0, header.1);
         headers.push_str(&header_style);
     }
-    println!("");
+    println!();
     println!("------------------------ Start Request-------------------------");
     let printable = format!("-- Version: {}\n-- Type: {}\n-- Path: {}\n-- Query Strings:{}\n-- Headers:{}", request.version, request.method, request.uri, query_strings, headers);
     println!("{}", printable);
