@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
+use error::FakeRestResult;
 use server::request::Request;
-use tokio::net::TcpListener;
+use tokio::net::{TcpListener, TcpStream};
 
 use crate::server::{response::{Status, Response}, connection::Connection};
 
@@ -18,12 +19,35 @@ const FAKE_REST: &str = r"
 | $$   /$$__  $$| $$_  $$ | $$_____/      | $$  \ $$| $$_____/ \____  $$  | $$ /$$
 | $$  |  $$$$$$$| $$ \  $$|  $$$$$$$      | $$  | $$|  $$$$$$$ /$$$$$$$/  |  $$$$/
 |__/   \_______/|__/  \__/ \_______/      |__/  |__/ \_______/|_______/    \___/  
-                                                                                  
-                                                                                                                                                              
+                                                                                                                                                                                                                                               
 ";
 
+
+async fn handle(socket: TcpStream) -> FakeRestResult {
+    let mut connection = Connection::new(socket).await?;
+    format_for_print(&connection.request);
+    
+    let body = String::from("Hello, World.");
+    let mut headers = HashMap::new();
+    headers.insert("Content-Type".to_string(), "application/json".to_string());
+    headers.insert("Content-Length".to_string(), body.len().to_string());
+    if let Some(host) = connection.request.headers.get("Host") {
+        headers.insert("Host".to_string(), host.to_string());
+    }
+
+    let response = Response {
+        status: Status::OK(),
+        headers,
+        body
+    };
+    connection.respond(response).await?;
+
+    Ok(())
+}
+
+
 #[tokio::main]
-async fn main() -> error::FakeRestResult {
+async fn main() -> FakeRestResult {
     println!("{}", FAKE_REST);
     let port = 7000;
     let host_and_port = format!("127.0.0.1:{}", port);
@@ -31,22 +55,7 @@ async fn main() -> error::FakeRestResult {
     println!("Start the server at <http://{}>...", host_and_port);
     loop {
         let (socket, _) = listener.accept().await?;
-        let mut connection = Connection::new(socket).await?;
-
-        let body = String::from("Hello, World.");
-
-        let mut headers = HashMap::new();
-        headers.insert("Content-Type".to_string(), "application/json".to_string());
-        headers.insert("Content-Length".to_string(), body.len().to_string());
-
-        let response = Response {
-            status: Status::OK(),
-            headers,
-            body
-        };
-        connection.respond(response).await?;
-
-        format_for_print(&connection.request);
+        handle(socket).await?;
     }
 }
 
