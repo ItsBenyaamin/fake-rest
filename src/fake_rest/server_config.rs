@@ -19,6 +19,7 @@ pub struct ServerDataSchema {
     pub path: String,
     pub result_type: String,
     pub result: String,
+    pub result_headers: Option<Vec<String>>,
     pub status_code: Option<usize>,
     pub headers: Option<Vec<String>>,
     pub queries: Option<Vec<String>>
