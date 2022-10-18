@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use serde::Deserialize;
 
+use crate::server::request::Method;
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct Server {
     pub config: Config,
@@ -15,7 +17,7 @@ pub struct Config {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ServerDataSchema {
-    pub method: String,
+    pub method: Method,
     pub path: String,
     pub result_type: String,
     pub result: String,
