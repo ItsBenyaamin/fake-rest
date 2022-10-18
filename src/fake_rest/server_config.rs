@@ -1,7 +1,5 @@
 use std::path::PathBuf;
-
 use serde::Deserialize;
-
 use crate::server::request::Method;
 
 #[derive(Debug, Deserialize, Clone)]
