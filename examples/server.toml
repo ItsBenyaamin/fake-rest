@@ -1,11 +1,11 @@
 [config]
 port = 7000
 
-[[server]]
+[[data]]
 method = "GET"
 path = "/"
-result_type = "direct"
-result = "Hello, World!"
+result_type = "file"
+result = "C:\\Workstation\\Programming\\Rust\\fake-rest\\examples\\result.json"
 status_code = 200
 headers = [#optional
     "Content-Length : 1024", 
@@ -16,11 +16,11 @@ queries = [#optional
     "fine = thank you",
 ]
 
-[[server]]
+[[data]]
 method = "GET"
 path = "/hello"
 result_type = "direct"
-result = "\"meg\" : \"hello!\""
+result = "{\"meg\" : \"hello!\"}"
 status_code = 200
 headers = [
     "Content-Length : 1024", 
