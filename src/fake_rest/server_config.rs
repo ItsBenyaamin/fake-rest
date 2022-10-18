@@ -27,6 +27,6 @@ pub struct ServerDataSchema {
 
 pub async fn parse_config_file(path: PathBuf) -> tokio::io::Result<Server> {
     let content = tokio::fs::read_to_string(path).await?;
-    let parsed_server: Server = toml::from_str(&content).unwrap();
+    let parsed_server = toml::from_str(&content)?;
     Ok(parsed_server)
 }
