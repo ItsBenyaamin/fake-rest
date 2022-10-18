@@ -1,6 +1,6 @@
 [package]
 name = "fake-rest"
-authors = ["Benyamin Eskandari"]
+authors = ["Benyamin Eskandari <me@benyaamin.com>"]
 version = "1.0.0"
 edition = "2021"
 
