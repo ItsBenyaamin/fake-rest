@@ -4,6 +4,8 @@ pub type RequestParseResult = Result<crate::server::request::Request, Error>;
 #[derive(Debug, Clone)]
 pub enum Error {
     ConfigParsingError,
+    ConfigRequiredQueriesError,
+    ConfigRequiredHeadersError,
     ParsingError,
     UTF8Error,
     IoError,
