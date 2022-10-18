@@ -22,7 +22,7 @@ check the [`example/server.toml`](https://github.com/graymind75/fake-rest/blob/m
 
 That's it, have fun.
 
-# what next?
+# what's next?
 FakeRest support `headers, query-strings` except `body` for now.
 
 I will add `form, multipart, etc` body as soon as possible to check and condition on those fields too.
