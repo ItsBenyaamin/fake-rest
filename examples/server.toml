@@ -1,32 +1,29 @@
 [config]
 port = 7000
 
+# full example
 [[data]]
 method = "GET"
 path = "/"
 result_type = "file"
-result = "C:\\Workstation\\Programming\\Rust\\fake-rest\\examples\\result.json"
+result = ".\\examples\\result.json" # It's for the sake of an example. better to use the full path.
 status_code = 200
 result_headers = [ #optional: these headers gonna return on response
-    "Content-Length : 1024", 
-    "Accept : application/json"
+    "Content-Type : application/json"
 ]
 headers = [ #optional: request must have these headers
-    "Authorization",
-    "Content-Length"
+    # "Authorization",
+    # "Content-Length"
 ]
 queries = [ #optional: request must have these queries
-    "hello", # key "hello" = value "whatever"
-    "fine",
+    # "hello",
+    # "test"
 ]
 
+# simple example(required fields)
 [[data]]
 method = "GET"
 path = "/hello"
 result_type = "direct"
 result = ""
 status_code = 200
-result_headers = [
-    "Content-Length : 1024", 
-    "Accept : application/json"
-]
