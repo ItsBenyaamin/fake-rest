@@ -1,28 +1,29 @@
 use std::{collections::HashMap, fmt::Display};
-use tokio::{net::{TcpStream}, io::AsyncReadExt};
+use serde::Deserialize;
+use tokio::{net::TcpStream, io::AsyncReadExt};
 
 use crate::error::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Deserialize, PartialEq)]
 pub enum Method {
-    Get,
-    Post,
-    Put,
-    Patch,
-    Option,
-    Delete
+    GET,
+    POST,
+    PUT,
+    PATCH,
+    OPTION,
+    DELETE
 }
 
 impl From<String> for Method {
     fn from(s: String) -> Self {
         return match s.as_str() {
-            "GET" => Method::Get,
-            "POST" => Method::Post,
-            "PUT" => Method::Put,
-            "PATCH" => Method::Patch,
-            "OPTION" => Method::Option,
-            "DELETE" => Method::Delete,
-            _=>  Method::Get
+            "GET" => Method::GET,
+            "POST" => Method::POST,
+            "PUT" => Method::PUT,
+            "PATCH" => Method::PATCH,
+            "OPTION" => Method::OPTION,
+            "DELETE" => Method::DELETE,
+            _=>  Method::GET
         }
     }
 }
@@ -30,12 +31,12 @@ impl From<String> for Method {
 impl Display for Method {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Method::Get => write!(f, "GET"),
-            Method::Post => write!(f, "POST"),
-            Method::Put => write!(f, "PUT"),
-            Method::Patch => write!(f, "PATCH"),
-            Method::Option => write!(f, "OPTION"),
-            Method::Delete => write!(f, "DELETE"),
+            Method::GET => write!(f, "GET"),
+            Method::POST => write!(f, "POST"),
+            Method::PUT => write!(f, "PUT"),
+            Method::PATCH => write!(f, "PATCH"),
+            Method::OPTION => write!(f, "OPTION"),
+            Method::DELETE => write!(f, "DELETE"),
         }
     }
 }
