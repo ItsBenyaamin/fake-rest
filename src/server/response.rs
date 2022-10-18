@@ -97,6 +97,15 @@ impl Response {
         }
         let server_data = server_data.unwrap();
 
+        // check if method is same
+        if request.method != server_data.method {
+            return Ok(Response {
+                status: Status::method_not_allowed(),
+                headers: HashMap::new(),
+                body: "Method Not Allowed".to_string()
+            })
+        }
+
         // check required headers
         if let Some(required_headers) = &server_data.headers {
             for header in required_headers.iter() {
