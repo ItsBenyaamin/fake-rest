@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 pub type FakeRestResult = Result<(), Error>;
 pub type RequestParseResult = Result<crate::server::request::Request, Error>;
 
@@ -9,6 +11,19 @@ pub enum Error {
     ParsingError,
     UTF8Error,
     IoError,
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::ConfigParsingError => write!(f, "ConfigParsingError"),
+            Error::ConfigRequiredQueriesError => write!(f, "ConfigRequiredQueriesError"),
+            Error::ConfigRequiredHeadersError => write!(f, "ConfigRequiredHeadersError"),
+            Error::ParsingError => write!(f, "ParsingError"),
+            Error::UTF8Error => write!(f, "UTF8Error"),
+            Error::IoError => write!(f, "IoError"),
+        }
+    }
 }
 
 impl From<std::io::Error> for Error {

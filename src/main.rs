@@ -42,9 +42,15 @@ pub struct FakeRestArgs {
 
 async fn handle(socket: TcpStream, server: &Server) -> FakeRestResult {
     let mut connection = Connection::new(socket).await?;
-    let response = Response::new(&connection.request, &server).await?;
-    connection.respond(response).await?;
-    print::format_for_print(&connection.request);
+    match Response::new(&connection.request, &server).await {
+        Ok(response) => {
+            connection.respond(response).await?;
+            print::format_for_print(&connection.request);
+        },
+        Err(e) => {
+            println!("Error on handling the request: {}", e);
+        },
+    }
     Ok(())
 }
 
