@@ -1,15 +1,21 @@
-use std::collections::HashMap;
+use fake_rest::server_config::Server;
 use tokio::net::{TcpListener, TcpStream};
 use std::path::PathBuf;
 use clap::Parser;
 
 mod error;
-mod server_config;
 mod server;
+mod fake_rest;
 
 use error::FakeRestResult;
-use crate::server::{response::{Status, Response}, connection::Connection};
-use server::request::Request;
+use crate::server::{
+    response::Response, 
+    connection::Connection, 
+};
+use crate::fake_rest::{
+    server_config,
+    print
+};
 
 const FAKE_REST: &str = r"
 /$$$$$$$$       /$$                       /$$$$$$$                        /$$    
@@ -34,21 +40,11 @@ pub struct FakeRestArgs {
 }
 
 
-async fn handle(socket: TcpStream) -> FakeRestResult {
+async fn handle(socket: TcpStream, server: &Server) -> FakeRestResult {
     let mut connection = Connection::new(socket).await?;
-    format_for_print(&connection.request);
-    
-    let body = String::from("Hello, World.");
-    let mut headers = HashMap::new();
-    headers.insert("Content-Type".to_string(), "application/json".to_string());
-    headers.insert("Content-Length".to_string(), body.len().to_string());
-    if let Some(host) = connection.request.headers.get("Host") {
-        headers.insert("Host".to_string(), host.to_string());
-    }
-
-    let response = Response::new(Status::ok(), headers, body);
+    let response = Response::new(&connection.request, &server).await?;
     connection.respond(response).await?;
-    
+    print::format_for_print(&connection.request);
     Ok(())
 }
 
@@ -58,36 +54,13 @@ async fn main() -> FakeRestResult {
     println!("{}", FAKE_REST);
 
     let args = FakeRestArgs::parse();
-    let server_config = server_config::parse_config_file(args.config).await?;
+    let server = server_config::parse_config_file(args.config).await?;
 
-    let host_and_port = format!("127.0.0.1:{}", server_config.config.port);
+    let host_and_port = format!("127.0.0.1:{}", server.config.port);
     let listener = TcpListener::bind(&host_and_port).await?;
     println!("Start the server at <http://{}>...", host_and_port);
     loop {
         let (socket, _) = listener.accept().await?;
-        handle(socket).await?;
+        handle(socket, &server).await?;
     }
-}
-
-fn format_for_print(request: &Request) {
-    let mut query_strings = String::new();
-    if request.query_strings.is_empty() {
-        query_strings.push_str("\n-      -- Empty --");
-    }else {
-        for query in request.query_strings.iter() {
-            let query_style = format!("\n-       -{} = {}", query.0, query.1);
-            query_strings.push_str(&query_style);
-        }
-    }
-    
-    let mut headers = String::new();
-    for header in request.headers.iter(){
-        let header_style = format!("\n-      -{} : {}", header.0, header.1);
-        headers.push_str(&header_style);
-    }
-    println!();
-    println!("------------------------ Start Request-------------------------");
-    let printable = format!("-- Version: {}\n-- Type: {}\n-- Path: {}\n-- Query Strings:{}\n-- Headers:{}", request.version, request.method, request.uri, query_strings, headers);
-    println!("{}", printable);
-    println!("------------------------ End  Request-------------------------");
 }
