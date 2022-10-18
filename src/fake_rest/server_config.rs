@@ -2,24 +2,24 @@ use std::path::PathBuf;
 
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Server {
     pub config: Config,
-    pub server: Vec<ServerDataSchema>
+    pub data: Vec<ServerDataSchema>
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Config {
     pub port: usize
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct ServerDataSchema {
     pub method: String,
     pub path: String,
     pub result_type: String,
     pub result: String,
-    pub status_code: usize,
+    pub status_code: Option<usize>,
     pub headers: Option<Vec<String>>,
     pub queries: Option<Vec<String>>
 }
