@@ -7,22 +7,26 @@ path = "/"
 result_type = "file"
 result = "C:\\Workstation\\Programming\\Rust\\fake-rest\\examples\\result.json"
 status_code = 200
-headers = [#optional
+result_headers = [ #optional: these headers gonna return on response
     "Content-Length : 1024", 
-    "Accept : application/plain"
+    "Accept : application/json"
 ]
-queries = [#optional
-    "hello = how are you",
-    "fine = thank you",
+headers = [ #optional: request must have these headers
+    "Authorization",
+    "Content-Length"
+]
+queries = [ #optional: request must have these queries
+    "hello", # key "hello" = value "whatever"
+    "fine",
 ]
 
 [[data]]
 method = "GET"
 path = "/hello"
 result_type = "direct"
-result = "{\"meg\" : \"hello!\"}"
+result = ""
 status_code = 200
-headers = [
+result_headers = [
     "Content-Length : 1024", 
     "Accept : application/json"
 ]
