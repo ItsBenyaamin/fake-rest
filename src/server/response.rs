@@ -96,6 +96,26 @@ impl Response {
             })
         }
         let server_data = server_data.unwrap();
+
+        // check required headers
+        if let Some(required_headers) = &server_data.headers {
+            for header in required_headers.iter() {
+                if !request.headers.contains_key(header) {
+                    return Err(error::Error::ConfigRequiredHeadersError);
+                }
+            }
+        }
+
+        // check required query strings
+        if let Some(required_query_strings) = &server_data.queries {
+            for query in required_query_strings.iter() {
+                if !request.query_strings.contains_key(query) {
+                    return Err(error::Error::ConfigRequiredQueriesError);
+                }
+            }
+        }
+
+        // get body of request
         let body = if server_data.result_type == "direct" {
             server_data.result
         }else {
@@ -103,19 +123,34 @@ impl Response {
             tokio::fs::read_to_string(path).await?
         };
 
+        // get status of request
         let status = if let Some(status) = server_data.status_code {
             Status::from(status)
         }else {
             Status::ok()
         };
 
+        // prepare response headers
         let mut headers = HashMap::new();
-        headers.insert("Content-Type".to_string(), "application/json".to_string());
         headers.insert("Content-Length".to_string(), body.len().to_string());
         if let Some(host) = request.headers.get("Host") {
             headers.insert("Host".to_string(), host.to_string());
         }
+        if let Some(data_header) = &server_data.result_headers {
+            for header_item in data_header.iter() {
+                let mut item_iter = header_item.split(':');
+                let key = match item_iter.next() {
+                    Some(k) => k.trim(),
+                    None => return Err(error::Error::ConfigParsingError),
+                };
+                let value = match item_iter.next() {
+                    Some(v) => v.trim(),
+                    None => return Err(error::Error::ConfigParsingError),
+                };
 
+                headers.insert(key.to_string(), value.to_string());
+            }
+        }
         Ok( Response { status, headers, body } )
     }
 
