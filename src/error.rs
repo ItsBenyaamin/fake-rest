@@ -6,6 +6,7 @@ pub type RequestParseResult = Result<crate::server::request::Request, Error>;
 #[derive(Debug, Clone)]
 pub enum Error {
     ConfigParsingError,
+    ConfigFileOpenError,
     ConfigRequiredQueriesError,
     ConfigRequiredHeadersError,
     ParsingError,
@@ -22,6 +23,7 @@ impl Display for Error {
             Error::ParsingError => write!(f, "ParsingError"),
             Error::UTF8Error => write!(f, "UTF8Error"),
             Error::IoError => write!(f, "IoError"),
+            Error::ConfigFileOpenError => write!(f, "ConfigFileOpenError"),
         }
     }
 }

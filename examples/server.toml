@@ -27,3 +27,10 @@ path = "/hello"
 result_type = "direct"
 result = ""
 status_code = 200
+
+# serve a file for download
+[[data]]
+method = "GET"
+path = "/dl"
+result_type = "dl"
+result = ".\\examples\\download.txt"

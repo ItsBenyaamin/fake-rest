@@ -1,7 +1,7 @@
 use std::{collections::HashMap, path::PathBuf};
-use crate::{fake_rest::server_config::{Server, ServerDataSchema}, error};
 
-use super::request::Request;
+use crate::{fake_rest::server_config::{Server, ServerDataSchema}, error::{self, Error}};
+use super::{request::Request, content_type::ContentType};
 
 pub struct Status {
     pub code: usize,
@@ -74,12 +74,14 @@ impl Status {
 pub struct Response {
     pub status: Status,
     pub headers: HashMap<String, String>,
-    pub body: String
+    pub body: Vec<u8>
 }
 
 impl Response {
 
     pub async fn new(request: &Request, server: &Server) -> Result<Response, error::Error> {
+        let mut headers = HashMap::new();
+
         let mut server_data: Option<ServerDataSchema> = None;
         for item in server.data.iter() {
             if item.path == request.uri {
@@ -92,7 +94,7 @@ impl Response {
             return Ok(Response {
                 status: Status::not_found(),
                 headers: HashMap::new(),
-                body: "Path not found".to_string()
+                body: "Path not found".as_bytes().to_vec()
             })
         }
         let server_data = server_data.unwrap();
@@ -102,7 +104,7 @@ impl Response {
             return Ok(Response {
                 status: Status::method_not_allowed(),
                 headers: HashMap::new(),
-                body: "Method Not Allowed".to_string()
+                body: "Method Not Allowed".as_bytes().to_vec()
             })
         }
 
@@ -124,14 +126,7 @@ impl Response {
             }
         }
 
-        // get body of request
-        let body = if server_data.result_type == "direct" {
-            server_data.result
-        }else {
-            let path = PathBuf::from(server_data.result);
-            tokio::fs::read_to_string(path).await?
-        };
-
+        
         // get status of request
         let status = if let Some(status) = server_data.status_code {
             Status::from(status)
@@ -139,8 +134,46 @@ impl Response {
             Status::ok()
         };
 
+    
+        // get body of request
+        let body: Vec<u8> = match server_data.result_type.as_str() {
+            "direct" => server_data.result.into_bytes(),
+            "file" => {
+                let path = PathBuf::from(server_data.result);
+                if !path.is_file() {
+                    return Err(Error::ConfigFileOpenError)
+                }
+
+                tokio::fs::read_to_string(path).await?.into_bytes()
+            },
+            "dl" => {
+                let path = PathBuf::from(server_data.result);
+                if !path.is_file() {
+                    return Err(Error::ConfigFileOpenError)
+                }
+
+                let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
+                let mut mime_type = String::new();
+                match path.extension() {
+                    Some(ext) => 
+                        mime_type.push_str(
+                            ContentType::get_mime_Type(
+                                ext.to_str().unwrap()
+                            ).as_str()
+                        ),
+                    None => {},
+                }
+                    
+                headers.insert("Content-Type".to_string(), mime_type);
+                headers.insert("Accept-Ranges".to_string(), "None".to_string());
+                headers.insert("Content-Disposition".to_string(), format!("attachment; filename={}", file_name));
+                tokio::fs::read(path).await?
+            },
+            _ => Vec::new()
+        };
+
+
         // prepare response headers
-        let mut headers = HashMap::new();
         headers.insert("Content-Length".to_string(), body.len().to_string());
         if let Some(host) = request.headers.get("Host") {
             headers.insert("Host".to_string(), host.to_string());
@@ -160,6 +193,8 @@ impl Response {
                 headers.insert(key.to_string(), value.to_string());
             }
         }
+
+
         Ok( Response { status, headers, body } )
     }
 
