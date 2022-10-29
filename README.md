@@ -26,3 +26,12 @@ That's it, have fun.
 FakeRest support `headers, query-strings` except `body` for now.
 
 I will add `form, multipart, etc` body as soon as possible to check and condition on those fields too.
+
+### Features:
+- [x] Serve String response as
+- [x] Serve file as response
+- [x] Serve file for download
+- Body Parsing:
+    - [ ] Form
+    - [ ] Multipart
+- [ ] Header value checking
