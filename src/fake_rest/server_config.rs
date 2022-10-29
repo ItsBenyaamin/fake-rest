@@ -10,6 +10,7 @@ pub struct Server {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
+    pub host: String,
     pub port: usize
 }
 

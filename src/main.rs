@@ -62,7 +62,7 @@ async fn main() -> FakeRestResult {
     let args = FakeRestArgs::parse();
     let server = server_config::parse_config_file(args.config).await?;
 
-    let host_and_port = format!("127.0.0.1:{}", server.config.port);
+    let host_and_port = format!("{}:{}", server.config.host, server.config.port);
     let listener = TcpListener::bind(&host_and_port).await?;
     println!("Start the server at <http://{}>...", host_and_port);
     loop {
