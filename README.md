@@ -31,6 +31,7 @@ I will add `form, multipart, etc` body as soon as possible to check and conditio
 - [x] Serve String response as
 - [x] Serve file as response
 - [x] Serve file for download
+- [x] Get host address from config file
 - Body Parsing:
     - [ ] Form
     - [ ] Multipart
