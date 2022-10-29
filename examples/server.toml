@@ -33,4 +33,4 @@ status_code = 200
 method = "GET"
 path = "/dl"
 result_type = "dl"
-result = ".\\examples\\some.mp4"
+result = ".\\examples\\download.txt"
