@@ -32,7 +32,8 @@ I will add `form, multipart, etc` body as soon as possible to check and conditio
 - [x] Serve file as response
 - [x] Serve file for download
 - [x] Get host address from config file
-- Body Parsing:
+- [ ] Path values
+- [ ] Body Parsing:
     - [ ] Form
     - [ ] Multipart
 - [ ] Header value checking
