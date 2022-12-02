@@ -56,17 +56,31 @@ async fn handle(socket: TcpStream, server: &Server) -> FakeRestResult {
 
 
 #[tokio::main]
-async fn main() -> FakeRestResult {
+async fn main() {
     println!("{}", FAKE_REST);
 
     let args = FakeRestArgs::parse();
-    let server = server_config::parse_config_file(args.config).await?;
+    let server = match server_config::parse_config_file(args.config).await {
+        Ok(s) => s,
+        Err(e) => panic!("{}", e.to_string())
+    };
 
     let host_and_port = format!("{}:{}", server.config.host, server.config.port);
-    let listener = TcpListener::bind(&host_and_port).await?;
+    let listener = match TcpListener::bind(&host_and_port).await {
+        Ok(v) => v,
+        Err(e) => panic!("{}", e.to_string())
+    };
+
     println!("Start the server at <http://{}>...", host_and_port);
     loop {
-        let (socket, _) = listener.accept().await?;
-        handle(socket, &server).await?;
+        let con = listener.accept().await;
+        if let Ok(connection) = con {
+            match handle(connection.0, &server).await {
+                Ok(_) => {},
+                Err(e) => println!("{}", e.to_string())
+            };
+        }else {
+            println!("{}", con.err().unwrap().to_string())
+        }
     }
 }
