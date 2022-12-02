@@ -1,5 +1,7 @@
 [config]
-host = "0.0.0.0"
+# for expose a port on the server: "0.0.0.0" 
+# for run on localhost on your machine: "127.0.0.1"
+host = "127.0.0.1"
 port = 7000
 
 # full example
@@ -7,7 +9,7 @@ port = 7000
 method = "GET"
 path = "/"
 result_type = "file"
-result = ".\\examples\\result.json" # It's for the sake of an example. better to use the full path.
+result = "examples/result.json" # It's for the sake of an example. better to use the full path.
 status_code = 200
 result_headers = [ #optional: these headers gonna return on response
     "Content-Type : application/json"
@@ -34,4 +36,6 @@ status_code = 200
 method = "GET"
 path = "/dl"
 result_type = "dl"
-result = ".\\examples\\download.txt"
+# unix:    "examples/download.txt"
+# windows: ".\\examples\\download.txt"
+result = "examples/download.txt"
