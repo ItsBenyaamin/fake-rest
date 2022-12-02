@@ -112,7 +112,9 @@ impl Response {
         if let Some(required_headers) = &server_data.headers {
             for header in required_headers.iter() {
                 if !request.headers.contains_key(header) {
-                    return Err(error::Error::ConfigRequiredHeadersError);
+                    return Err(error::Error::ConfigRequiredHeadersError(
+                        format!("the `{}` header is not founded in the request.", header)
+                    ));
                 }
             }
         }
@@ -121,7 +123,9 @@ impl Response {
         if let Some(required_query_strings) = &server_data.queries {
             for query in required_query_strings.iter() {
                 if !request.query_strings.contains_key(query) {
-                    return Err(error::Error::ConfigRequiredQueriesError);
+                    return Err(error::Error::ConfigRequiredQueriesError(
+                        format!("the `{}` query is not founded in the request.", query)
+                    ));
                 }
             }
         }
@@ -139,17 +143,21 @@ impl Response {
         let body: Vec<u8> = match server_data.result_type.as_str() {
             "direct" => server_data.result.into_bytes(),
             "file" => {
-                let path = PathBuf::from(server_data.result);
+                let path = PathBuf::from(&server_data.result);
                 if !path.is_file() {
-                    return Err(Error::ConfigFileOpenError)
+                    return Err(Error::ConfigFileOpenError(
+                        format!("The given path is invalid or not a file: {}", &server_data.result)
+                    ))
                 }
 
                 tokio::fs::read_to_string(path).await?.into_bytes()
             },
             "dl" => {
-                let path = PathBuf::from(server_data.result);
+                let path = PathBuf::from(&server_data.result);
                 if !path.is_file() {
-                    return Err(Error::ConfigFileOpenError)
+                    return Err(Error::ConfigFileOpenError(
+                        format!("The given path is invalid or not a file: {}", &server_data.result)
+                    ))
                 }
 
                 let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
@@ -183,11 +191,11 @@ impl Response {
                 let mut item_iter = header_item.split(':');
                 let key = match item_iter.next() {
                     Some(k) => k.trim(),
-                    None => return Err(error::Error::ConfigParsingError),
+                    None => return Err(error::Error::ConfigParsingError(header_item.to_string())),
                 };
                 let value = match item_iter.next() {
                     Some(v) => v.trim(),
-                    None => return Err(error::Error::ConfigParsingError),
+                    None => return Err(error::Error::ConfigParsingError(header_item.to_string())),
                 };
 
                 headers.insert(key.to_string(), value.to_string());

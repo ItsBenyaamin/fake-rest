@@ -74,12 +74,16 @@ impl Request {
                     let mut iter = header_line.split(':');
                     let key = match iter.next() {
                         Some(key) => key,
-                        None => return Err(Error::ParsingError)
+                        None => return Err(Error::ParsingError(
+                            format!("cant parse this header: `{}`", header_line)
+                        ))
                     };
 
                     let value = match iter.next() {
                         Some(value) => value.trim(),
-                        None => return Err(Error::ParsingError)
+                        None => return Err(Error::ParsingError(
+                            format!("cant parse this header: `{}`", header_line)
+                        ))
                     };
 
                     headers.insert(key.to_string(), value.to_string());
@@ -95,7 +99,9 @@ impl Request {
         let mut uri_iter = uri.split('?');
         let uri = match uri_iter.next() {
             Some(uri) => uri.to_string(),
-            None => return Err(Error::ParsingError),
+            None => return Err(Error::ParsingError(
+                format!("cant get uri of the request: `{}`", uri)
+            ))
         };
 
         let mut query_strings: HashMap<String, String> = HashMap::new();
@@ -105,11 +111,15 @@ impl Request {
                 let mut query_iter = query.split('=');
                 let key = match query_iter.next() {
                     Some(key) => key,
-                    None => return Err(Error::ParsingError)
+                    None => return Err(Error::ParsingError(
+                        format!("cant parse this query string: `{}`", query)
+                    ))
                 };
                 let value = match query_iter.next() {
                     Some(value) => value.trim(),
-                    None => return Err(Error::ParsingError)
+                    None => return Err(Error::ParsingError(
+                        format!("cant parse this query string: `{}`", query)
+                    ))
                 };
 
                 query_strings.insert(key.to_string(), value.to_string());
