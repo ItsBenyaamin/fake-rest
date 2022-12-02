@@ -5,43 +5,43 @@ pub type RequestParseResult = Result<crate::server::request::Request, Error>;
 
 #[derive(Debug, Clone)]
 pub enum Error {
-    ConfigParsingError,
-    ConfigFileOpenError,
-    ConfigRequiredQueriesError,
-    ConfigRequiredHeadersError,
-    ParsingError,
-    UTF8Error,
-    IoError,
+    ConfigParsingError(String),
+    ConfigFileOpenError(String),
+    ConfigRequiredQueriesError(String),
+    ConfigRequiredHeadersError(String),
+    ParsingError(String),
+    UTF8Error(String),
+    IoError(String),
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::ConfigParsingError => write!(f, "ConfigParsingError"),
-            Error::ConfigRequiredQueriesError => write!(f, "ConfigRequiredQueriesError"),
-            Error::ConfigRequiredHeadersError => write!(f, "ConfigRequiredHeadersError"),
-            Error::ParsingError => write!(f, "ParsingError"),
-            Error::UTF8Error => write!(f, "UTF8Error"),
-            Error::IoError => write!(f, "IoError"),
-            Error::ConfigFileOpenError => write!(f, "ConfigFileOpenError"),
+            Error::ConfigParsingError(e) => write!(f, "failed to parse a header! {}", e),
+            Error::ConfigRequiredQueriesError(e) => write!(f, "{}", e),
+            Error::ConfigRequiredHeadersError(e) => write!(f, "{}", e),
+            Error::ParsingError(e) => write!(f, "{}", e),
+            Error::UTF8Error(e) => write!(f, "{}", e),
+            Error::IoError(e) => write!(f, "{}", e),
+            Error::ConfigFileOpenError(e) => write!(f, "failed to open config file! {}", e),
         }
     }
 }
 
 impl From<std::io::Error> for Error {
-    fn from(_: std::io::Error) -> Self {
-        Error::IoError
+    fn from(e: std::io::Error) -> Self {
+        Error::IoError(e.to_string())
     }
 }
 
 impl From<std::string::FromUtf8Error> for Error {
-    fn from(_: std::string::FromUtf8Error) -> Self {
-        Error::UTF8Error
+    fn from(e: std::string::FromUtf8Error) -> Self {
+        Error::UTF8Error(e.to_string())
     }
 }
 
 impl From<toml::de::Error> for Error {
-    fn from(_: toml::de::Error) -> Self {
-        Error::ConfigParsingError
+    fn from(e: toml::de::Error) -> Self {
+        Error::ConfigParsingError(e.to_string())
     }
 }
