@@ -71,9 +71,7 @@ impl Request {
 
                     let header_line = String::from_utf8(buff[..buff.len() - 2].to_vec())?;
                     buff.clear();
-                    let header = Request::get_key_value(
-                        &mut header_line.split(':')
-                    )?;
+                    let header = Request::get_key_value(&header_line, ':')?;
 
                     headers.insert(header.0, header.1);
                 }
@@ -97,9 +95,7 @@ impl Request {
 
         if let Some(queries) = uri_iter.next() {
             for query in queries.split('&') {
-                let result = Request::get_key_value(
-                    &mut query.split(':')
-                )?;
+                let result = Request::get_key_value(query, '=')?;
                 query_strings.insert(result.0, result.1);
             }
         }
@@ -107,18 +103,19 @@ impl Request {
         Ok(Request { method, uri, version, headers, query_strings })
     }
 
-    fn get_key_value(header_iter: &mut std::str::Split<char>) -> Result<(String, String), Error> {
-        let key = match header_iter.next() {
+    fn get_key_value(content: &str, delimiter: char) -> Result<(String, String), Error> {
+        let mut split = content.split(delimiter);
+        let key = match split.next() {
             Some(key) => key.trim(),
             None => return Err(Error::ParsingError(
-                format!("cant parse this header: `{}`", header_line)
+                format!("cant parse this header: `{}`", content)
             ))
         };
 
-        let value = match header_iter.next() {
+        let value = match split.next() {
             Some(value) => value.trim(),
             None => return Err(Error::ParsingError(
-                format!("cant parse this header: `{}`", header_line)
+                format!("cant parse this header: `{}`", content)
             ))
         };
         Ok((key.to_string(), value.to_string()))
