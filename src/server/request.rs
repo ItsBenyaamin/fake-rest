@@ -3,6 +3,7 @@ use serde::Deserialize;
 use tokio::{net::TcpStream, io::AsyncReadExt};
 
 use crate::error::Error;
+use crate::server::helpers;
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 pub enum Method {
@@ -71,7 +72,7 @@ impl Request {
 
                     let header_line = String::from_utf8(buff[..buff.len() - 2].to_vec())?;
                     buff.clear();
-                    let header = Request::get_key_value(&header_line, ':')?;
+                    let header = helpers::get_key_value(&header_line, ':')?;
 
                     headers.insert(header.0, header.1);
                 }
@@ -95,30 +96,12 @@ impl Request {
 
         if let Some(queries) = uri_iter.next() {
             for query in queries.split('&') {
-                let result = Request::get_key_value(query, '=')?;
+                let result = helpers::get_key_value(query, '=')?;
                 query_strings.insert(result.0, result.1);
             }
         }
 
         Ok(Request { method, uri, version, headers, query_strings })
-    }
-
-    fn get_key_value(content: &str, delimiter: char) -> Result<(String, String), Error> {
-        let mut split = content.split(delimiter);
-        let key = match split.next() {
-            Some(key) => key.trim(),
-            None => return Err(Error::ParsingError(
-                format!("cant parse this header: `{}`", content)
-            ))
-        };
-
-        let value = match split.next() {
-            Some(value) => value.trim(),
-            None => return Err(Error::ParsingError(
-                format!("cant parse this header: `{}`", content)
-            ))
-        };
-        Ok((key.to_string(), value.to_string()))
     }
 
 }
