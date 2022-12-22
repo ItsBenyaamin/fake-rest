@@ -71,22 +71,11 @@ impl Request {
 
                     let header_line = String::from_utf8(buff[..buff.len() - 2].to_vec())?;
                     buff.clear();
-                    let mut iter = header_line.split(':');
-                    let key = match iter.next() {
-                        Some(key) => key,
-                        None => return Err(Error::ParsingError(
-                            format!("cant parse this header: `{}`", header_line)
-                        ))
-                    };
+                    let header = Request::get_key_value(
+                        &mut header_line.split(':')
+                    )?;
 
-                    let value = match iter.next() {
-                        Some(value) => value.trim(),
-                        None => return Err(Error::ParsingError(
-                            format!("cant parse this header: `{}`", header_line)
-                        ))
-                    };
-
-                    headers.insert(key.to_string(), value.to_string());
+                    headers.insert(header.0, header.1);
                 }
             }
         }
@@ -108,25 +97,31 @@ impl Request {
 
         if let Some(queries) = uri_iter.next() {
             for query in queries.split('&') {
-                let mut query_iter = query.split('=');
-                let key = match query_iter.next() {
-                    Some(key) => key,
-                    None => return Err(Error::ParsingError(
-                        format!("cant parse this query string: `{}`", query)
-                    ))
-                };
-                let value = match query_iter.next() {
-                    Some(value) => value.trim(),
-                    None => return Err(Error::ParsingError(
-                        format!("cant parse this query string: `{}`", query)
-                    ))
-                };
-
-                query_strings.insert(key.to_string(), value.to_string());
+                let result = Request::get_key_value(
+                    &mut query.split(':')
+                )?;
+                query_strings.insert(result.0, result.1);
             }
         }
 
         Ok(Request { method, uri, version, headers, query_strings })
+    }
+
+    fn get_key_value(header_iter: &mut std::str::Split<char>) -> Result<(String, String), Error> {
+        let key = match header_iter.next() {
+            Some(key) => key,
+            None => return Err(Error::ParsingError(
+                format!("cant parse this header: `{}`", header_line)
+            ))
+        };
+
+        let value = match header_iter.next() {
+            Some(value) => value.trim(),
+            None => return Err(Error::ParsingError(
+                format!("cant parse this header: `{}`", header_line)
+            ))
+        };
+        Ok((key.to_string(), value.to_string()))
     }
 
 }
