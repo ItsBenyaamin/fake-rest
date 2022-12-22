@@ -15,8 +15,8 @@ result_headers = [ #optional: these headers gonna return on response
     "Content-Type : application/json"
 ]
 headers = [ #optional: request must have these headers
-    # "Authorization",
-    # "Content-Length"
+     "Authorization", # Just check if header exists on request
+     "SomeHeader: SomeValue", # Check the existance of header and compare value
 ]
 queries = [ #optional: request must have these queries
     # "hello",
