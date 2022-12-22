@@ -109,7 +109,7 @@ impl Request {
 
     fn get_key_value(header_iter: &mut std::str::Split<char>) -> Result<(String, String), Error> {
         let key = match header_iter.next() {
-            Some(key) => key,
+            Some(key) => key.trim(),
             None => return Err(Error::ParsingError(
                 format!("cant parse this header: `{}`", header_line)
             ))
