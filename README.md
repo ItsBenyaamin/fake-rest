@@ -36,4 +36,4 @@ I will add `form, multipart, etc` body as soon as possible to check and conditio
 - [ ] Body Parsing:
     - [ ] Form
     - [ ] Multipart
-- [ ] Header value checking
+- [x] Header value checking

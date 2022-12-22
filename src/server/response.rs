@@ -2,8 +2,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use crate::{fake_rest::server_config::{Server, ServerDataSchema}, error::{self, Error}};
 use crate::server::status::Status;
-use super::{request::Request, content_type::ContentType};
-
+use super::{request::Request, content_type::ContentType, helpers};
 
 pub struct Response {
     pub status: Status,
@@ -45,10 +44,19 @@ impl Response {
         // check required headers
         if let Some(required_headers) = &server_data.headers {
             for header in required_headers.iter() {
-                if !request.headers.contains_key(header) {
-                    return Err(Error::ConfigRequiredHeadersError(
+                let result = helpers::get_key_optional_value(header, ':')?;
+
+                match request.headers.get(&result.0) {
+                    Some(value) => {
+                        if !result.1.is_empty() && value.as_str() != result.1 {
+                            return Err(Error::ConfigRequiredHeadersError(
+                                format!("the {} header's value is not equal.", header)
+                            ));
+                        }
+                    }
+                    None => return Err(Error::ConfigRequiredHeadersError(
                         format!("the `{}` header is not founded in the request.", header)
-                    ));
+                    ))
                 }
             }
         }
