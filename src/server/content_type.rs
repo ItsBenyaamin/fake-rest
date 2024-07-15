@@ -34,7 +34,7 @@ pub enum ContentType {
 
 impl ContentType {
 
-    pub fn get_mime_Type(extension: &str) -> String {
+    pub fn get_mime_type(extension: &str) -> String {
         let content_type: ContentType = extension.into();
         content_type.into()
     }

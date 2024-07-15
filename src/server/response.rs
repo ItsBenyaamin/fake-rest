@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::PathBuf};
 
-use crate::{fake_rest::server_config::{Server, ServerDataSchema}, error::{self, Error}};
+use crate::{fake_rest::server_config::{Server, ServerDataSchema}, error::Error};
 use crate::server::status::Status;
 use super::{request::Request, content_type::ContentType, helpers};
 
@@ -107,7 +107,7 @@ impl Response {
                 match path.extension() {
                     Some(ext) => 
                         mime_type.push_str(
-                            ContentType::get_mime_Type(
+                            ContentType::get_mime_type(
                                 ext.to_str().unwrap()
                             ).as_str()
                         ),
