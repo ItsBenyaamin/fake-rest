@@ -8,6 +8,7 @@ It's very simple to use. just create a `whatever.toml` file and put these lines 
 ```
 [config]
 port = 7000
+host = "127.0.0.1"
 
 [[data]]
 method = "GET"
